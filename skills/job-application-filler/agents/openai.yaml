@@ -1,0 +1,6 @@
+interface:
+  display_name: "求职表单助手"
+  short_description: "从简历建立资料库并协助填写、核对和记录网页求职申请表单"
+  default_prompt: "Use $job-application-filler to fill the job application form I opened and stop before any save or submission step."
+policy:
+  allow_implicit_invocation: false
