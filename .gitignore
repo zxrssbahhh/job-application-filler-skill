@@ -1,0 +1,18 @@
+# Local applicant data must never be committed.
+求职资料/
+**/求职资料/
+
+# Common resume and credential file formats.
+*.pdf
+*.doc
+*.docx
+*.jpg
+*.jpeg
+*.png
+*.heic
+
+# OS/editor files.
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
