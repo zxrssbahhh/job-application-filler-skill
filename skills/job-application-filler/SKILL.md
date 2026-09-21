@@ -5,7 +5,7 @@ description: Fill and verify a job application form that the user has already op
 
 # Job Application Filler
 
-Help a job seeker fill an application accurately, improve their reusable profile after each application, and hand the completed page back before any save, preview, advance, consent, or submission action.
+Help a job seeker fill an application accurately, improve their reusable profile after each application, and by default hand the completed page back before any save, preview, advance, consent, or submission action.
 
 ## Scope and invariants
 
@@ -36,7 +36,7 @@ Read [references/data-model.md](references/data-model.md) when initializing or m
 - Identify the company, role, location, recruitment system, required fields, optional professional sections, upload controls, and page actions.
 - Select a resume using the stored role-to-resume mapping. If no mapping fits, ask once and remember the answer.
 - Determine which photo and required attachments will be used from `附件清单.md`.
-- Scan the whole form before asking questions.
+- Map the available sections and their fields once. On a step-by-step site, inspect the current step rather than repeatedly traversing inaccessible later steps.
 
 ### 2. Show one preflight summary
 
@@ -69,15 +69,25 @@ Actively check for implausible dates, wrong schools, merged or duplicated projec
 - Preserve user wording where possible. Condense only to satisfy field limits, without adding unsupported claims.
 - Use the browser's documented file-chooser flow for uploads and verify the displayed filename afterward.
 
-### 5. Verify and hand off
+### 5. Fill efficiently without weakening checks
+
+- Prepare a section-level field-to-value plan from the trusted profile before editing. Reuse the profile and the current browser/tab handle instead of reopening files, tabs, or the same page between fields.
+- For stable, already-inspected fields, perform several ordinary browser `fill`/selection actions consecutively, preferably in one tool call. Use whole-value fill or paste, not character-by-character typing. Do not mutate the page through read-only inspection APIs, hidden network requests, or unsupported scripts to gain speed.
+- Check the cheapest authoritative state after a meaningful group of actions (normally once per section, before saving or leaving it), not a full DOM snapshot or screenshot after every field. Reinspect immediately when an action changes the form structure, a dependent field, validation, or upload state; do not continue against stale locators.
+- Avoid redundant clicks and blur operations: when the next field naturally commits the previous field, use that transition and verify the resulting value at the section boundary. Do not use fixed sleeps unless the page is actually waiting for a known transition.
+- On multi-step forms, finish and verify the visible step, then move on only if the user has explicitly authorized that site's save/next action and the active browser policy permits it. Otherwise leave the step ready for the user. Never infer authorization for consent, declarations, or final submission.
+- If ordinary browser actions repeatedly take unusually long, time a small read-only operation, distinguish page delay from control-channel delay where possible, and tell the user what was observed. Reduce redundant inspections/retries, but do not promise a specific speedup or assume a proxy is the cause.
+- Report progress at section boundaries and during long-running work; do not stop for a new conversational turn after each field. If a tab becomes stale or a connection fails, avoid reloading or navigating away from unsaved entries; explain when their state cannot be verified.
+
+### 6. Verify and hand off
 
 - Re-scan all required fields and verify upload filenames.
 - Check that resume parsing did not overwrite corrected values.
 - List every blank optional field, user-owned question, placeholder, inference, and unresolved mismatch.
-- Do not click save, next, preview, consent, declaration, or submit controls.
+- Do not click save, next, preview, consent, declaration, or submit controls by default. A specific authorization can override save/next/preview only, subject to the active browser policy; consent, declarations, and final submission remain with the user.
 - Keep the live page available and hand it back to the user.
 
-### 6. Update the profile
+### 7. Update the profile
 
 - Add newly confirmed facts and preferences after the application.
 - Register newly supplied attachments and role mappings.
